@@ -14,15 +14,18 @@ th { background-color: #f2f2f2; } </style> </head> <body> <h1>Search Books by Ge
         <?php echo htmlspecialchars($book['title']); ?></td> <td><?php echo htmlspecialchars($book['author']); ?></td> <td>
         <?php echo htmlspecialchars($book['genre']); ?></td> <td><?php echo htmlspecialchars($book['publication_year']); ?></td> <td>$
         <?php echo htmlspecialchars($book['price']); ?></td> </tr> <?php endforeach; ?> </table> <?php elseif ($_SERVER['REQUEST_METHOD'] == 'POST'): ?> 
-    <p>No books found for the genre "<?php echo htmlspecialchars($searchGenre); ?>".</p> <?php endif; ?> 
-<?php try { // Prepare and execute query 
-$stmt = $pdo->prepare("SELECT * FROM `books` ORDER BY `title`"); $stmt->execute(); 
+    <p>No books found for the genre "<?php echo htmlspecialchars($searchGenre); ?>".</p> <?php endif; ?>
+
+    <?php try { // Prepare and execute query 
+$stmt = $pdo->prepare("SELECT * FROM `students` ORDER BY `gpa` DESC"); $stmt->execute(); 
 // Fetch all results 
-$books = $stmt->fetchAll(PDO::FETCH_ASSOC); echo "<h2>Book Collection</h2>"; if (count($books) > 0) 
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC); echo "<h2>Students</h2>"; if (count($students) > 0) 
 { echo "<table border='1' style='border-collapse: collapse; width: 100%;'>"; 
-echo "<tr><th>ID</th><th>Title</th><th>Author</th><th>Genre</th><th>Year</th><th>Price</th></tr>"; 
-foreach ($books as $book) { echo "<tr>"; echo "<td>" . htmlspecialchars($book['id']) . "</td>";
-echo "<td>" . htmlspecialchars($book['title']) . "</td>"; echo "<td>" . htmlspecialchars($book['author']) . "</td>"; 
-echo "<td>" . htmlspecialchars($book['genre']) . "</td>"; echo "<td>" . htmlspecialchars($book['publication_year']) . "</td>"; 
-echo "<td>$" . htmlspecialchars($book['price']) . "</td>"; echo "</tr>"; } echo "</table>"; } else { echo "<p>No books found in the database.</p>"; } } 
+echo "<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Major</th><th>GPA</th></tr>"; 
+foreach ($students as $student) { echo "<tr>"; echo "<td>" . htmlspecialchars($student['id']) . "</td>";
+echo "<td>" . htmlspecialchars($student['first_name']) . "</td>"; echo "<td>" . htmlspecialchars($student['last_name']) . "</td>"; 
+echo "<td>" . htmlspecialchars($student['email']) . "</td>"; echo "<td>" . htmlspecialchars($student['major']) . "</td>"; 
+echo "<td>" . htmlspecialchars($student['gpa']) . "</td>"; echo "</tr>"; } echo "</table>"; } 
+else { echo "<p>No students found in the database.</p>"; } } 
 catch(PDOException $e) { echo "<p style='color: red;'>Error: " . $e->getMessage() . "</p>"; } ?>
+</body> </html>
