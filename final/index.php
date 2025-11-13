@@ -1,38 +1,50 @@
-<?php // starts a session that saves user cookies
+<?php 
+// starts a session that saves user cookies
 session_start();
 
 require_once 'db/db_connection.php';
+require_once 'classes/DatabaseTable.php';
+require_once 'classes/PostController.php';
+require_once 'classes/UserController.php';
+require_once 'classes/CommentController.php';
 
-// connects to the db
-$sql = "SELECT * FROM posts ORDER BY created_at DESC";
-$stmt = $pdo->query($sql);
-$posts = $stmt->fetchAll();
+// Initialize database tables
+$usersTable = new DatabaseTable($pdo, 'users', 'id');
+$postsTable = new DatabaseTable($pdo, 'posts', 'id');
+$commentsTable = new DatabaseTable($pdo, 'comments', 'id');
+
+// Initialize controllers
+$postController = new PostController($postsTable, $usersTable, $commentsTable);
+$userController = new UserController($usersTable);
+$commentController = new CommentController($commentsTable, $postsTable);
+
+$action = $_GET['action'] ?? 'list';
+
+$routes = [
+    'list' => fn() => $postController->list(),
+    'view' => fn() => $postController->view(),
+    'create' => fn() => $postController->create(),
+    'update' => fn() => $postController->update(),
+    'delete' => fn() => $postController->delete(),
+    'register' => fn() => $userController->register(),
+    'login' => fn() => $userController->login(),
+    'logout' => fn() => $userController->logout(),
+    'comment' => fn() => $commentController->create(),
+];
+
+$page = isset($routes[$action]) ? $routes[$action]() : ['template' => 'error.html.php', 'title' => 'Page Not Found', 'variables' => []];
+
+// Extract variables
+$title = $page['title'];
+$variables = $page['variables'] ?? [];
+extract($variables);
+
+// Include header
+include 'include/header.html.php';
+
+// Include template
+include 'templates/' . $page['template'];
+
+// Include footer
+include 'include/footer.html.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>final</title>
-    <link rel="stylesheet" href="styles/styles.css">
-</head>
-<body>
-<h1>My Blog</h1>
-<a href="new_post.php">Add New Post</a>
-<hr>
-
-<?php
-if ($posts) { // loops through each post and displays them
-    foreach ($posts as $post) {
-        echo '<h2><a href="post.php?id=' . $post['id'] . '">' . htmlspecialchars($post['title']) . '</a></h2>';
-        echo '<p>' . htmlspecialchars($post['content']) . '...</p>';
-        echo '<p>Posted on ' . $post['created_at'] . '</p><hr>';
-    }
-} else {
-    echo '<p>No posts yet.</p>';
-}
-?>
-    
-</body>
-</html>
